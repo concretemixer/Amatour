@@ -8,12 +8,12 @@ public class Ball : MonoBehaviour {
 	void Start () {
 
 
-        Vector3 v = new Vector3(-0.35f, 0.2f, 1);
+        Vector3 v = Quaternion.Euler(-35.28f,0, 0) * Vector3.forward;
         lifetime = 0;
         v.Normalize();
 
-            v *= 28;
-            GetComponent<Rigidbody>().velocity = v;
+        v *= 15;
+        GetComponent<Rigidbody>().velocity = v;
 
         Debug.Log("v1 = " + GetComponent<Rigidbody>().velocity.magnitude);
 
@@ -43,6 +43,18 @@ public class Ball : MonoBehaviour {
             GetComponent<Rigidbody>().AddForce(new Vector3(0, -G, 0));
             GetComponent<Rigidbody>().AddForce(v * (Air * vLen * vLen));
         }
+        else
+        {
+            Vector3 v2 = GetComponent<Rigidbody>().velocity;
+            if (v2.y < 0)
+            {
+                Debug.Log("z = " + transform.position.z);
+                v2.y = -v2.y * 0.75f;
+                v2.x = v2.x * 0.8f;
+                v2.z = v2.z * 0.8f;
+                GetComponent<Rigidbody>().velocity = v2;
+            }
+        }
 
      
         GetComponent<Rigidbody>().AddForce(f);
@@ -55,29 +67,29 @@ public class Ball : MonoBehaviour {
 
 	void Update () {
 
-        if (Input.GetKey(KeyCode.A))
-        {
-            GetComponent<Rigidbody>().isKinematic = false;
-            float x = gameObject.transform.position.x;
-            gameObject.transform.position = new Vector3(4.09f, 1.3f, -11.89f);
-            Time.timeScale = 1f;
-            Start();
-        }
         if (Input.GetKey(KeyCode.B))
         {
             if (!keyB)
             {
                 float speed = GetComponent<Rigidbody>().velocity.magnitude;
+
                 Vector3 v;
                 if (transform.position.z>0)
-                    v = new Vector3(0, 0,-11.89f) - transform.position;
+                    v = new Vector3(Random.Range(-4,4), 0,-Random.Range(6.4f,11.89f)) - transform.position;
                 else
-                    v = new Vector3(0, 0, 11.89f) - transform.position;
-                v.Normalize();
-                v.y = 0.8f;
+                    v = new Vector3(Random.Range(-4, 4), 0, Random.Range(6.4f, 11.89f)) - transform.position;
+               
+                v.y = 0.0f;
+
+                float angle;
+
+                CountAngle(speed * 0.99f, transform.position.y, v.magnitude, v.magnitude / 2, out angle);
                 v.Normalize();
 
-                GetComponent<Rigidbody>().velocity = v * speed * 0.6f;
+                v.y = Mathf.Tan( Mathf.PI * angle / 180.0f);
+                v.Normalize();
+
+                GetComponent<Rigidbody>().velocity = v * speed * 0.99f;
 
                 keyB = true;
             }
@@ -89,17 +101,41 @@ public class Ball : MonoBehaviour {
         {
             if (!keyC)
             {
+
                 float speed = GetComponent<Rigidbody>().velocity.magnitude;
+
                 Vector3 v;
                 if (transform.position.z > 0)
-                    v = new Vector3(0, 1.3f, -11.89f) - transform.position;
+                    v = new Vector3(Random.Range(-4, 4), 0, -Random.Range(6.4f, 11.89f)) - transform.position;
                 else
-                    v = new Vector3(0, 0, 11.89f) - transform.position;
-                v.Normalize();
-                v.y = 0.6f;
-                v.Normalize();
+                    v = new Vector3(Random.Range(-4, 4), 0, Random.Range(6.4f, 11.89f)) - transform.position;
 
-                GetComponent<Rigidbody>().velocity = v * speed * 1.5f;
+
+                v.y = 0.0f;
+
+                float angle;
+
+                float dNet = Mathf.Abs(transform.position.z / v.z) * v.magnitude;
+
+                if (CountAngle(speed * 0.6f + 20, transform.position.y, v.magnitude, dNet, out angle))
+                {
+                    v.Normalize();
+
+                    v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
+                    v.Normalize();
+
+                    GetComponent<Rigidbody>().velocity = v * (speed * 0.6f + 20);
+                }
+                else
+                {
+                    CountAngle(speed * 0.6f + 10, transform.position.y, v.magnitude, dNet, out angle);
+                    v.Normalize();
+
+                    v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
+                    v.Normalize();
+
+                    GetComponent<Rigidbody>().velocity = v * (speed * 0.6f + 10);
+                }
 
                 keyC = true;
             }
@@ -111,24 +147,66 @@ public class Ball : MonoBehaviour {
 	}
 
     void OnTriggerEnter(Collider col) {
-
-        if (col.gameObject.tag == "Clay")
-        {
-            Vector3 v = GetComponent<Rigidbody>().velocity;
-            if (v.y < 0)
-            {
-                Debug.Log("v2 = " + GetComponent<Rigidbody>().velocity.magnitude);
-                v.y = -v.y * 0.75f;
-                v.x = v.x * 0.8f;
-                v.z = v.z * 0.8f;
-                GetComponent<Rigidbody>().velocity = v;
-            }
-        }
-        return;
-        Debug.Log("t = " + lifetime.ToString());
-        Debug.Log("pos = " + gameObject.transform.position.z);
-        Debug.Log("v2 = " + GetComponent<Rigidbody>().velocity.magnitude);
-        Time.timeScale = 0;
-        GetComponent<Rigidbody>().isKinematic = true;
+      
     }
+
+
+    bool CountAngle(float s, float y, float d, float dNet, out float _angle)
+    {
+        Debug.Log("D => " + d);
+        float angleMax = 45;
+        float angleMin = -45;
+        _angle = 0;
+        Vector3 pos = Vector3.zero;
+        do
+        {
+            float angle = (angleMax + angleMin) * 0.5f;
+
+            if (Mathf.Abs(angleMax - angleMin) < 0.5)
+                break;
+
+            Vector3 v = Quaternion.Euler(-angle, 0, 0) * Vector3.forward;
+            v *= s;
+
+            pos = new Vector3(0, y, 0);
+
+            bool netOk = false;
+            while (pos.z < d * 2 && pos.y > 0)
+            {
+                float vLen = v.magnitude;
+                Vector3 v1 = -v;
+                v1.Normalize();
+                Vector3 force = new Vector3(0, -G, 0) + (v1 * (Air * vLen * vLen));
+                v += force * Time.fixedDeltaTime;
+                pos += v * Time.fixedDeltaTime;
+
+                
+                
+                if (pos.z > dNet && !netOk) {
+                    if (pos.y > 1.2)
+                        netOk = true;
+                    else                    
+                        break;
+                    
+                }
+            }
+
+            Debug.Log(angle.ToString() + " => " + pos.z);
+
+            if (netOk)
+            {
+                if (pos.z > d)
+                    angleMax = angle;
+                if (pos.z < d)
+                    angleMin = angle;
+            }
+            else
+                angleMin = angle;
+
+            _angle = angle;
+
+        } while (Mathf.Abs(pos.z - d) > 0.1);
+
+        return Mathf.Abs(pos.z - d) <= 0.5;
+     }
 }

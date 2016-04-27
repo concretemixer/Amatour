@@ -101,42 +101,8 @@ public class Ball : MonoBehaviour {
         {
             if (!keyC)
             {
-
-                float speed = GetComponent<Rigidbody>().velocity.magnitude;
-
-                Vector3 v;
-                if (transform.position.z > 0)
-                    v = new Vector3(Random.Range(-4, 4), 0, -Random.Range(6.4f, 11.89f)) - transform.position;
-                else
-                    v = new Vector3(Random.Range(-4, 4), 0, Random.Range(6.4f, 11.89f)) - transform.position;
-
-
-                v.y = 0.0f;
-
-                float angle;
-
-                float dNet = Mathf.Abs(transform.position.z / v.z) * v.magnitude;
-
-                if (CountAngle(speed * 0.6f + 20, transform.position.y, v.magnitude, dNet, out angle))
-                {
-                    v.Normalize();
-
-                    v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
-                    v.Normalize();
-
-                    GetComponent<Rigidbody>().velocity = v * (speed * 0.6f + 20);
-                }
-                else
-                {
-                    CountAngle(speed * 0.6f + 10, transform.position.y, v.magnitude, dNet, out angle);
-                    v.Normalize();
-
-                    v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
-                    v.Normalize();
-
-                    GetComponent<Rigidbody>().velocity = v * (speed * 0.6f + 10);
-                }
-
+                Hit();
+               
                 keyC = true;
             }
         }
@@ -145,6 +111,45 @@ public class Ball : MonoBehaviour {
        
 
 	}
+
+    public void Hit()
+    {
+        float speed = GetComponent<Rigidbody>().velocity.magnitude;
+
+        Vector3 v;
+        if (transform.position.z > 0)
+            v = new Vector3(Random.Range(-4, 4), 0, -Random.Range(6.4f, 11.89f)) - transform.position;
+        else
+            v = new Vector3(Random.Range(-4, 4), 0, Random.Range(6.4f, 11.89f)) - transform.position;
+
+
+        v.y = 0.0f;
+
+        float angle;
+
+        float dNet = Mathf.Abs(transform.position.z / v.z) * v.magnitude;
+
+        if (CountAngle(speed * 0.6f + 20, transform.position.y, v.magnitude, dNet, out angle))
+        {
+            v.Normalize();
+
+            v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
+            v.Normalize();
+
+            GetComponent<Rigidbody>().velocity = v * (speed * 0.6f + 20);
+        }
+        else
+        {
+            CountAngle(speed * 0.6f + 10, transform.position.y, v.magnitude, dNet, out angle);
+            v.Normalize();
+
+            v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
+            v.Normalize();
+
+            GetComponent<Rigidbody>().velocity = v * (speed * 0.6f + 10);
+        }
+
+    }
 
     void OnTriggerEnter(Collider col) {
       

@@ -48,7 +48,7 @@ public class Ball : MonoBehaviour {
             Vector3 v2 = GetComponent<Rigidbody>().velocity;
             if (v2.y < 0)
             {
-                Debug.Log("z = " + transform.position.z);
+              //  Debug.Log("z = " + transform.position.z);
                 v2.y = -v2.y * 0.75f;
                 v2.x = v2.x * 0.8f;
                 v2.z = v2.z * 0.8f;
@@ -158,7 +158,7 @@ public class Ball : MonoBehaviour {
 
     bool CountAngle(float s, float y, float d, float dNet, out float _angle)
     {
-        Debug.Log("D => " + d);
+        //Debug.Log("D => " + d);
         float angleMax = 45;
         float angleMin = -45;
         _angle = 0;
@@ -196,7 +196,7 @@ public class Ball : MonoBehaviour {
                 }
             }
 
-            Debug.Log(angle.ToString() + " => " + pos.z);
+          //  Debug.Log(angle.ToString() + " => " + pos.z);
 
             if (netOk)
             {

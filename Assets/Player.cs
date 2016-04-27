@@ -12,13 +12,15 @@ public class Player : MonoBehaviour {
         Approach,
         Move,
         React,
+        GiveUp,
         Swing,
         Hit
     }
 
     PlayerState state;
     float reactFreeze = 0.1f;
-
+    float swingTimer = 0;
+    float hitCooldown = 0;
 
     GameObject ball;
 
@@ -57,7 +59,7 @@ public class Player : MonoBehaviour {
                         if (ball.GetComponent<Rigidbody>().velocity.z > 0)
                         {
                             reactFreeze = 0.1f;
-                            state = PlayerState.React;
+                            state = PlayerState.React;                            
                             GetComponent<Rigidbody>().velocity = Vector3.zero;
                         }
                     }
@@ -66,7 +68,7 @@ public class Player : MonoBehaviour {
             case PlayerState.Watching:
                 if (ball.GetComponent<Rigidbody>().velocity.z > 0)
                 {
-                    reactFreeze = 0.1f;
+                    reactFreeze = 0.2f;
                     state = PlayerState.React;
                     GetComponent<Rigidbody>().velocity = Vector3.zero;
                 }
@@ -86,6 +88,9 @@ public class Player : MonoBehaviour {
                     GetComponent<Rigidbody>().velocity = Vector3.zero;
                 }
                 break;
+            case PlayerState.GiveUp:
+                GetComponent<Rigidbody>().velocity = Vector3.zero;
+                break;
             case PlayerState.Move:
                 {
                     if (moveTo == Vector3.zero)
@@ -99,18 +104,37 @@ public class Player : MonoBehaviour {
                     {
                         state = PlayerState.Swing;
                         GetComponent<Rigidbody>().velocity = Vector3.zero;
+                        swingTimer = 0;
                     }
+
+                    if (ball.transform.position.z > contactPoint.z)
+                        state = PlayerState.GiveUp;
                 }
                 break;
             case PlayerState.Swing:
+                swingTimer += Time.deltaTime;
                 if (ball.GetComponent<Rigidbody>().velocity.z > 0)
                 {
                     if (ball.transform.position.z > contactPoint.z)
+                    {
+                        Debug.Log("Hit: " + swingTimer);
                         ball.GetComponent<Ball>().Hit();
+                        state = PlayerState.Hit;
+                        hitCooldown = 0.2f;
+                    }
+                }
+                break;
+            case PlayerState.Hit:
+                hitCooldown -= Time.deltaTime;
+                if (hitCooldown < 0)
+                {
+                    state = PlayerState.Recover;
+                    moveTo = Vector3.zero;
                 }
                 break;
         }
 
+        /*
         if (state == PlayerState.Move || state == PlayerState.Swing || state == PlayerState.Hit)
         {
             if (ball.GetComponent<Rigidbody>().velocity.z < 0)
@@ -119,6 +143,7 @@ public class Player : MonoBehaviour {
                 moveTo = Vector3.zero;
             }
         }
+         */
 	}
 
     void CountHitPoint()

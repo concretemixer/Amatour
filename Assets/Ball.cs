@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Ball : MonoBehaviour {
 
@@ -13,7 +14,7 @@ public class Ball : MonoBehaviour {
         v.Normalize();
 
         v *= 15;
-        GetComponent<Rigidbody>().velocity = v;
+        //GetComponent<Rigidbody>().velocity = v;
 
         Debug.Log("v1 = " + GetComponent<Rigidbody>().velocity.magnitude);
 
@@ -26,6 +27,15 @@ public class Ball : MonoBehaviour {
 
     const float G = 11f;
     const float Air = 0.015f;
+
+    Vector3 GetReboundV(Vector3 v)
+    {
+        Vector3 v2 = new Vector3();
+        v2.y = -v.y * 0.75f;
+        v2.x = v.x * 0.8f;
+        v2.z = v.z * 0.8f;
+        return v2;
+    }
 
     void FixedUpdate()
     {
@@ -48,11 +58,8 @@ public class Ball : MonoBehaviour {
             Vector3 v2 = GetComponent<Rigidbody>().velocity;
             if (v2.y < 0)
             {
-              //  Debug.Log("z = " + transform.position.z);
-                v2.y = -v2.y * 0.75f;
-                v2.x = v2.x * 0.8f;
-                v2.z = v2.z * 0.8f;
-                GetComponent<Rigidbody>().velocity = v2;
+              //  Debug.Log("z = " + transform.position.z);                
+                GetComponent<Rigidbody>().velocity = GetReboundV(v2);
             }
         }
 
@@ -101,9 +108,12 @@ public class Ball : MonoBehaviour {
         {
             if (!keyC)
             {
-                Hit();
-               
+                GetComponent<Rigidbody>().velocity = Vector3.zero;
+                transform.position = new Vector3(Random.Range(-4, 4), 1, 13);
+                Hit();               
                 keyC = true;
+
+                GameObject.Find("SimplePeople_Prostitute_Black").GetComponent<Tennisist>().OnBallHit();
             }
         }
         else
@@ -118,9 +128,9 @@ public class Ball : MonoBehaviour {
 
         Vector3 v;
         if (transform.position.z > 0)
-            v = new Vector3(Random.Range(-4, 4), 0, -Random.Range(6.4f, 11.89f)) - transform.position;
+            v = new Vector3(Random.Range(-4, 4), 0, -Random.Range(6.4f, 11.0f)) - transform.position;
         else
-            v = new Vector3(Random.Range(-4, 4), 0, Random.Range(6.4f, 11.89f)) - transform.position;
+            v = new Vector3(Random.Range(-4, 4), 0, Random.Range(6.4f, 11.0f)) - transform.position;
 
 
         v.y = 0.0f;
@@ -135,7 +145,7 @@ public class Ball : MonoBehaviour {
 
             v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
             v.Normalize();
-
+            
             GetComponent<Rigidbody>().velocity = v * (speed * 0.6f + 20);
         }
         else
@@ -214,4 +224,52 @@ public class Ball : MonoBehaviour {
 
         return Mathf.Abs(pos.z - d) <= 0.5;
      }
+
+    public List<Vector3> Trajectory
+    {
+        get { return trajectory; }
+    }
+
+
+    public Vector3 Velocity
+    {
+        get { return GetComponent<Rigidbody>().velocity; }
+    }
+
+    private List<Vector3> trajectory = new List<Vector3>();
+    private float trajectoryTime;
+    public float TrajectoryTime
+    {
+        get { return trajectoryTime; }        
+    }
+
+    public void CountTrajectory()
+    {
+        trajectory.Clear();
+        trajectoryTime = Time.time;
+        Vector3 pos = transform.position;
+        Vector3 v = GetComponent<Rigidbody>().velocity;
+
+        int ground = 0;
+        while (ground <= 1 || trajectory.Count<100)
+        {
+            Vector3 v1 = -v;
+            v1.Normalize();
+            float vLen = v.magnitude;
+            Vector3 force = new Vector3(0, -G, 0) + (v1 * (Air * vLen * vLen));
+
+            v += force * Time.fixedDeltaTime;
+            pos += v * Time.fixedDeltaTime;
+
+
+            if (pos.y < 0 && v.y < 0)
+            {
+                ground++;
+                v = GetReboundV(v);
+            }
+
+            trajectory.Add(pos);
+        }
+    }
+
 }

@@ -78,26 +78,14 @@ public class Ball : MonoBehaviour {
         {
             if (!keyB)
             {
-                float speed = GetComponent<Rigidbody>().velocity.magnitude;
+                transform.position = new Vector3(-2, 0.5f, 13);
 
-                Vector3 v;
-                if (transform.position.z>0)
-                    v = new Vector3(Random.Range(-4,4), 0,-Random.Range(6.4f,11.89f)) - transform.position;
-                else
-                    v = new Vector3(Random.Range(-4, 4), 0, Random.Range(6.4f, 11.89f)) - transform.position;
-               
-                v.y = 0.0f;
-
-                float angle;
-
-                CountAngle(speed * 0.99f, transform.position.y, v.magnitude, v.magnitude / 2, out angle);
+                Vector3 v = new Vector3(0, 0.5f, -1);
                 v.Normalize();
 
-                v.y = Mathf.Tan( Mathf.PI * angle / 180.0f);
-                v.Normalize();
+                GetComponent<Rigidbody>().velocity = v * 20f;
 
-                GetComponent<Rigidbody>().velocity = v * speed * 0.99f;
-
+                GameObject.Find("SimplePeople_Prostitute_Black").GetComponent<Tennisist>().OnBallHit();
                 keyB = true;
             }
         }

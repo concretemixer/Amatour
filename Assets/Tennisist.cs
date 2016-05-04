@@ -7,13 +7,13 @@ public class Tennisist : MonoBehaviour {
 
     enum HitType
     {
-        None,
-        Drive,
-        Slice,
-        Volley,
-        Reach,
-        Block,
-        Smash
+        None = 0,
+        Drive = 1,
+        Slice = 2,
+        Volley = 3,
+        Reach = 4,
+        Block = 5,
+        Smash = 6
     }
 
     enum PlayerState
@@ -34,14 +34,16 @@ public class Tennisist : MonoBehaviour {
     protected float reactCooldown = 0.1f;
 
     protected float driveSwingTime = 0.9f;
-    protected float volleySwingTime = 0.75f;
+    protected float volleySwingTime = 0.66f;
     protected float sliceSwingTime = 0.9f;
     protected float reachSwingTime = 0.25f;
 
     protected Vector3 driveHitDistanceFH = new Vector3 (-1.5f,0, -0.8f);
     protected Vector3 driveHitDistanceBH = new Vector3(1.25f, 0, -0.9f);
 
-    protected float volleyHitDistance = 0.75f;
+    protected Vector3 volleyHitDistanceFH = new Vector3(-1.2f, 0, -0.8f);
+    protected Vector3 volleyHitDistanceBH = new Vector3(1.2f, 0, -0.8f);
+
     protected float sliceHitDistance = 0.75f;
     protected float reachHitDistance = 1.5f;
 
@@ -124,6 +126,14 @@ public class Tennisist : MonoBehaviour {
                                 moveTo.z = -13;
                             }
                             break;
+                        case HitType.Volley:
+                            if (hitTimer < -volleySwingTime)
+                            {
+                                ball.GetComponent<Ball>().Hit();
+                                state = PlayerState.Recover;
+                                moveTo.z = -4;
+                            }
+                            break;
                     }
                 }
                 break;
@@ -143,6 +153,7 @@ public class Tennisist : MonoBehaviour {
         if (state == PlayerState.Run || state == PlayerState.Strafe)
         {
             animator.SetBool("Forehand", forehand);
+            animator.SetInteger("HitType", (int)hit);
             if ((transform.position - moveTo).magnitude < 0.1)
             {
                 
@@ -188,12 +199,18 @@ public class Tennisist : MonoBehaviour {
         moveV.y = 0;
         moveGS.y = 0;
 
-        moveV.x += shift * volleyHitDistance;
+
 
         if (forehand)
+        {
+            moveV += volleyHitDistanceFH;
             moveGS += driveHitDistanceFH;
+        }
         else
+        {
+            moveV += volleyHitDistanceBH;
             moveGS += driveHitDistanceBH;
+        }
         
 
         GameObject.Find("MoveGS").transform.position = moveGS;
@@ -242,7 +259,7 @@ public class Tennisist : MonoBehaviour {
         Debug.Log("canHitSlice = " + canHitSlice );
         Debug.Log("shouldRun = " + shouldRun);
 
-        moveTo = moveGS;
+        moveTo = dV > dGS ? moveGS : moveV;
 
         state = shouldRun ? PlayerState.Run : PlayerState.Strafe;
         hit = HitType.None;

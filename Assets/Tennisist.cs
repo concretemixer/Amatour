@@ -34,15 +34,15 @@ public class Tennisist : MonoBehaviour {
     protected float reactCooldown = 0.1f;
 
     protected float driveSwingTime = 0.9f;
-    protected float volleySwingTime = 0.66f;
+    protected float volleySwingTime = 0.25f;
     protected float sliceSwingTime = 0.9f;
     protected float reachSwingTime = 0.25f;
 
     protected Vector3 driveHitDistanceFH = new Vector3 (-1.5f,0, -0.8f);
     protected Vector3 driveHitDistanceBH = new Vector3(1.25f, 0, -0.9f);
 
-    protected Vector3 volleyHitDistanceFH = new Vector3(-1.2f, 0, -0.8f);
-    protected Vector3 volleyHitDistanceBH = new Vector3(1.2f, 0, -0.8f);
+    protected Vector3 volleyHitDistanceFH = new Vector3(-1.2f, 0, -0.6f);
+    protected Vector3 volleyHitDistanceBH = new Vector3(1.0f, 0, -0.5f);
 
     protected float sliceHitDistance = 0.75f;
     protected float reachHitDistance = 1.5f;
@@ -50,8 +50,8 @@ public class Tennisist : MonoBehaviour {
     protected float groundstrokeHeightMin = 0.5f;
     protected float groundstrokeHeightMax = 1.5f;
 
-    protected float volleyHeightMin = 0.5f;
-    protected float volleyHeightMax = 2.5f;
+    protected float volleyHeightMin = 1.5f;
+    protected float volleyHeightMax = 2.0f;
 
     protected float reachHeightMin = 0.1f;
 
@@ -129,9 +129,14 @@ public class Tennisist : MonoBehaviour {
                         case HitType.Volley:
                             if (hitTimer < -volleySwingTime)
                             {
-                                ball.GetComponent<Ball>().Hit();
+                                Vector3 v = ball.GetComponent<Rigidbody>().velocity;
+                                v.z = -v.z;
+                                v.y = Mathf.Abs(v.y);
+                                ball.GetComponent<Rigidbody>().velocity = v;
+                                //ball.GetComponent<Ball>().Hit();
                                 state = PlayerState.Recover;
                                 moveTo.z = -4;
+                               // Time.timeScale = 0.1f;
                             }
                             break;
                     }
@@ -232,6 +237,7 @@ public class Tennisist : MonoBehaviour {
         {
             canHitDrive = driveSwingTime + (dGS / vRun) < hitGSTime;
             canHitVolley = volleySwingTime + (dV / vRun) < hitVTime;
+           
             if (canHitDrive || canHitVolley)
             {
                 shouldRun = true;
@@ -248,7 +254,7 @@ public class Tennisist : MonoBehaviour {
         }
 
         Debug.Log("hitGSTime =" + hitGSTime);
-        Debug.Log("hitVTime =" + hitVTime);
+        Debug.Log("hitVTime =" + hitVTime + " / " + (volleySwingTime + (dV / vRun)));
 
         Debug.Log("dGS =" + dGS);
         Debug.Log("dV =" + dV);

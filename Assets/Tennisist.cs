@@ -13,7 +13,8 @@ public class Tennisist : MonoBehaviour {
         Volley = 3,
         Reach = 4,
         Block = 5,
-        Smash = 6
+        Smash = 6,
+        Serve = 7
     }
 
     enum PlayerState
@@ -41,8 +42,8 @@ public class Tennisist : MonoBehaviour {
     protected Vector3 driveHitDistanceFH = new Vector3 (-1.5f,0, -0.8f);
     protected Vector3 driveHitDistanceBH = new Vector3(1.25f, 0, -0.9f);
 
-    protected Vector3 volleyHitDistanceFH = new Vector3(-1.2f, 0, -0.6f);
-    protected Vector3 volleyHitDistanceBH = new Vector3(1.0f, 0, -0.5f);
+    protected Vector3 volleyHitDistanceFH = new Vector3(-1.2f, 0, -0.7f);
+    protected Vector3 volleyHitDistanceBH = new Vector3(0.75f, 0, -0.6f);
 
     protected float sliceHitDistance = 0.75f;
     protected float reachHitDistance = 1.5f;
@@ -50,8 +51,8 @@ public class Tennisist : MonoBehaviour {
     protected float groundstrokeHeightMin = 0.5f;
     protected float groundstrokeHeightMax = 1.5f;
 
-    protected float volleyHeightMin = 1.5f;
-    protected float volleyHeightMax = 2.0f;
+    protected float volleyHeightMin = 0.7f;
+    protected float volleyHeightMax = 2.2f;
 
     protected float reachHeightMin = 0.1f;
 
@@ -60,8 +61,9 @@ public class Tennisist : MonoBehaviour {
 
     PlayerState state = PlayerState.Watching;
     HitType hit;
+    float hitHeightK;
     bool forehand;
-    float hitTimer =  10000;
+    float hitTimer =  7000;
 
     Vector3 moveTo = Vector3.zero;
     Vector3 contactPoint = Vector3.zero;
@@ -75,9 +77,13 @@ public class Tennisist : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+
+       // if (state!=PlayerState.Watching)
+        //    Debug.Log("S = " + state.ToString());
         Animator animator = GetComponent<Animator>();
 
         hitTimer -= Time.deltaTime;
+        //Debug.Log("hitTimer2 = " + hitTimer);
 
         switch (state)
         {
@@ -124,6 +130,7 @@ public class Tennisist : MonoBehaviour {
                                 ball.GetComponent<Ball>().Hit();
                                 state = PlayerState.Recover;
                                 moveTo.z = -13;
+                             //   Time.timeScale = 0;
                             }
                             break;
                         case HitType.Volley:
@@ -138,6 +145,9 @@ public class Tennisist : MonoBehaviour {
                                 moveTo.z = -4;
                                // Time.timeScale = 0.1f;
                             }
+                            break;
+                        default:
+                            state = PlayerState.Watching;
                             break;
                     }
                 }
@@ -159,6 +169,7 @@ public class Tennisist : MonoBehaviour {
         {
             animator.SetBool("Forehand", forehand);
             animator.SetInteger("HitType", (int)hit);
+            animator.SetFloat("HitHeight", hitHeightK);
             if ((transform.position - moveTo).magnitude < 0.1)
             {
                 
@@ -171,7 +182,7 @@ public class Tennisist : MonoBehaviour {
                 animator.SetBool("ReadyToHit", false);        
         }
         else
-            animator.SetInteger("MoveType", 0);
+            animator.SetInteger("MoveType", 3);
     
 	}
 
@@ -266,14 +277,17 @@ public class Tennisist : MonoBehaviour {
         Debug.Log("shouldRun = " + shouldRun);
 
         moveTo = dV > dGS ? moveGS : moveV;
+        //moveTo = transform.position;
+        //moveTo.y = 0;
 
         state = shouldRun ? PlayerState.Run : PlayerState.Strafe;
         hit = HitType.None;
 
-        hitTimer = 1000;
+        hitTimer = 100;
 
         if (canHitVolley && !shouldRun)
         {
+            hitHeightK = (hitV.y - volleyHeightMin) / (volleyHeightMax - volleyHeightMin);
             hitTimer = hitVTime - volleySwingTime;
             hit = HitType.Volley;
             moveTo = moveV;
@@ -281,7 +295,7 @@ public class Tennisist : MonoBehaviour {
         else if (canHitDrive)
         {
             hit = HitType.Drive;
-            hitTimer = hitGSTime - driveSwingTime;
+            hitTimer = hitGSTime - driveSwingTime;            
         }
         else if (canHitSlice)
         {
@@ -291,6 +305,7 @@ public class Tennisist : MonoBehaviour {
         else if (canHitVolley)
         {
             hit = HitType.Volley;
+            hitHeightK = (hitV.y - volleyHeightMin) / (volleyHeightMax - volleyHeightMin);
             hitTimer = hitVTime - volleySwingTime;
             moveTo = moveV;
         }

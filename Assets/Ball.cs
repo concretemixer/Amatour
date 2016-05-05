@@ -78,12 +78,12 @@ public class Ball : MonoBehaviour {
         {
             if (!keyB)
             {
-                transform.position = new Vector3(-2, 0.5f, 13);
+                transform.position = new Vector3(1, 0.5f, 14);
 
                 Vector3 v = new Vector3(0, 0.5f, -1);
                 v.Normalize();
 
-                GetComponent<Rigidbody>().velocity = v * 20f;
+                GetComponent<Rigidbody>().velocity = v * 18f;
 
                 GameObject.Find("SimplePeople_Prostitute_Black").GetComponent<Tennisist>().OnBallHit();
                 keyB = true;

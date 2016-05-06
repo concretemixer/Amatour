@@ -30,13 +30,13 @@ public class Tennisist : MonoBehaviour {
         Hit
     }
 
-    protected float vRun = 2.5f;
-    protected float vStrafe = 1;
-    protected float reactCooldown = 0.1f;
+    protected float vRun = 4f;
+    protected float vStrafe = 1.5f;
+    protected float reactCooldown = 0.2f;
 
     protected float driveSwingTime = 0.9f;
     protected float volleySwingTime = 0.25f;
-    protected float sliceSwingTime = 0.9f;
+    protected float sliceSwingTime = 0.5f;
     protected float reachSwingTime = 0.25f;
 
     protected Vector3 driveHitDistanceFH = new Vector3 (-1.5f,0, -0.8f);
@@ -129,8 +129,17 @@ public class Tennisist : MonoBehaviour {
                             {
                                 ball.GetComponent<Ball>().Hit();
                                 state = PlayerState.Recover;
-                                moveTo.z = -13;
+                               // moveTo.z = -13;
                              //   Time.timeScale = 0;
+                            }
+                            break;
+                        case HitType.Slice:
+                            if (hitTimer < -sliceSwingTime)
+                            {
+                                ball.GetComponent<Ball>().HitSlice();
+                                state = PlayerState.Recover;
+                                // moveTo.z = -13;
+                                //   Time.timeScale = 0;
                             }
                             break;
                         case HitType.Volley:
@@ -142,7 +151,7 @@ public class Tennisist : MonoBehaviour {
                                 ball.GetComponent<Rigidbody>().velocity = v;
                                 //ball.GetComponent<Ball>().Hit();
                                 state = PlayerState.Recover;
-                                moveTo.z = -4;
+                             //   moveTo.z = -4;
                                // Time.timeScale = 0.1f;
                             }
                             break;
@@ -208,9 +217,10 @@ public class Tennisist : MonoBehaviour {
 
         Vector3 moveV = hitV, moveGS = hitGS;
 
-
+        float opp = Mathf.Sign(-transform.position.z);
         float shift = Mathf.Sign(transform.position.x - hitGS.x);
-        forehand = shift < 0;
+
+        forehand = (opp*shift) < 0;
 
         moveV.y = 0;
         moveGS.y = 0;
@@ -219,13 +229,13 @@ public class Tennisist : MonoBehaviour {
 
         if (forehand)
         {
-            moveV += volleyHitDistanceFH;
-            moveGS += driveHitDistanceFH;
+            moveV += volleyHitDistanceFH * opp;
+            moveGS += driveHitDistanceFH * opp;
         }
         else
         {
-            moveV += volleyHitDistanceBH;
-            moveGS += driveHitDistanceBH;
+            moveV += volleyHitDistanceBH * opp;
+            moveGS += driveHitDistanceBH * opp;
         }
         
 
@@ -264,17 +274,17 @@ public class Tennisist : MonoBehaviour {
 
         }
 
-        Debug.Log("hitGSTime =" + hitGSTime);
+        Debug.Log("hitGSTime =" + hitGSTime + " / " + (driveSwingTime + (dGS / vRun)));
         Debug.Log("hitVTime =" + hitVTime + " / " + (volleySwingTime + (dV / vRun)));
 
-        Debug.Log("dGS =" + dGS);
-        Debug.Log("dV =" + dV);
+     //   Debug.Log("dGS =" + dGS);
+      //  Debug.Log("dV =" + dV);
 
-
+/*
         Debug.Log("canHitDrive = " + canHitDrive  );
         Debug.Log("canHitVolley = " + canHitVolley); 
         Debug.Log("canHitSlice = " + canHitSlice );
-        Debug.Log("shouldRun = " + shouldRun);
+        Debug.Log("shouldRun = " + shouldRun);*/
 
         moveTo = dV > dGS ? moveGS : moveV;
         //moveTo = transform.position;

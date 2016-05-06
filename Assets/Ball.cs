@@ -28,6 +28,13 @@ public class Ball : MonoBehaviour {
     const float G = 11f;
     const float Air = 0.015f;
 
+    bool sliced = false;
+
+    public bool Sliced
+    {
+        get { return sliced; }        
+    }
+
     Vector3 GetReboundV(Vector3 v)
     {
         Vector3 v2 = new Vector3();
@@ -50,7 +57,8 @@ public class Ball : MonoBehaviour {
 
         if (transform.position.y > 0)
         {
-            GetComponent<Rigidbody>().AddForce(new Vector3(0, -G, 0));
+            float _G = sliced ? G * 0.5f : G;
+            GetComponent<Rigidbody>().AddForce(new Vector3(0, -_G, 0));
             GetComponent<Rigidbody>().AddForce(v * (Air * vLen * vLen));
         }
         else
@@ -85,7 +93,12 @@ public class Ball : MonoBehaviour {
 
                 GetComponent<Rigidbody>().velocity = v * 18f;
 
-                GameObject.Find("SimplePeople_Prostitute_Black").GetComponent<Tennisist>().OnBallHit();
+                foreach (var o in GameObject.FindGameObjectsWithTag("Player"))
+                {
+                    if (Mathf.Sign(o.transform.position.z) != Mathf.Sign(transform.position.z))
+                        o.GetComponent<Tennisist>().OnBallHit();
+                }
+
                 keyB = true;
             }
         }
@@ -97,11 +110,10 @@ public class Ball : MonoBehaviour {
             if (!keyC)
             {
                 GetComponent<Rigidbody>().velocity = Vector3.zero;
-                transform.position = new Vector3(Random.Range(-4, 4), 1, 13);
+                transform.position = new Vector3(Random.Range(-4, 4), 1, -13);
                 Hit();               
                 keyC = true;
 
-                GameObject.Find("SimplePeople_Prostitute_Black").GetComponent<Tennisist>().OnBallHit();
             }
         }
         else
@@ -112,6 +124,53 @@ public class Ball : MonoBehaviour {
 
     public void Hit()
     {
+        sliced = false;
+        float speed = GetComponent<Rigidbody>().velocity.magnitude;
+
+        Vector3 v;
+        if (transform.position.z > 0)
+            v = new Vector3(Random.Range(-4, 4), 0, -Random.Range(6.4f, 10.0f)) - transform.position;
+        else
+            v = new Vector3(Random.Range(-4, 4), 0, Random.Range(6.4f, 10.0f)) - transform.position;
+
+
+        v.y = 0.0f;
+
+        float angle;
+
+        float dNet = Mathf.Abs(transform.position.z / v.z) * v.magnitude;
+
+        if (CountAngle(speed * 0.1f + 20, transform.position.y, v.magnitude, dNet, out angle))
+        {
+            v.Normalize();
+
+            v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
+            v.Normalize();
+            
+            GetComponent<Rigidbody>().velocity = v * (speed * 0.1f + 20);
+        }
+        else
+        {
+            CountAngle(speed * 0.1f + 10, transform.position.y, v.magnitude, dNet, out angle);
+            v.Normalize();
+
+            v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
+            v.Normalize();
+
+            GetComponent<Rigidbody>().velocity = v * (speed * 0.1f + 10);
+        }
+
+        foreach (var o in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            if (Mathf.Sign(o.transform.position.z) != Mathf.Sign(transform.position.z))
+                o.GetComponent<Tennisist>().OnBallHit();
+        }
+    }
+
+
+    public void HitSlice()
+    {
+        sliced = true;
         float speed = GetComponent<Rigidbody>().velocity.magnitude;
 
         Vector3 v;
@@ -127,28 +186,32 @@ public class Ball : MonoBehaviour {
 
         float dNet = Mathf.Abs(transform.position.z / v.z) * v.magnitude;
 
-        if (CountAngle(speed * 0.6f + 20, transform.position.y, v.magnitude, dNet, out angle))
+        if (CountAngle(speed * 0.1f + 15, transform.position.y, v.magnitude, dNet, out angle))
         {
             v.Normalize();
 
             v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
             v.Normalize();
-            
-            GetComponent<Rigidbody>().velocity = v * (speed * 0.6f + 20);
+
+            GetComponent<Rigidbody>().velocity = v * (speed * 0.1f + 15);
         }
         else
         {
-            CountAngle(speed * 0.6f + 10, transform.position.y, v.magnitude, dNet, out angle);
+            angle = 45;
             v.Normalize();
 
             v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
             v.Normalize();
 
-            GetComponent<Rigidbody>().velocity = v * (speed * 0.6f + 10);
+            GetComponent<Rigidbody>().velocity = v * (speed * 0.1f + 15);
         }
 
+        foreach (var o in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            if (Mathf.Sign(o.transform.position.z) != Mathf.Sign(transform.position.z))
+                o.GetComponent<Tennisist>().OnBallHit();
+        }
     }
-
     void OnTriggerEnter(Collider col) {
       
     }
@@ -161,6 +224,9 @@ public class Ball : MonoBehaviour {
         float angleMin = -45;
         _angle = 0;
         Vector3 pos = Vector3.zero;
+
+        float _G = sliced ? G * 0.5f : G;
+
         do
         {
             float angle = (angleMax + angleMin) * 0.5f;
@@ -179,7 +245,7 @@ public class Ball : MonoBehaviour {
                 float vLen = v.magnitude;
                 Vector3 v1 = -v;
                 v1.Normalize();
-                Vector3 force = new Vector3(0, -G, 0) + (v1 * (Air * vLen * vLen));
+                Vector3 force = new Vector3(0, -_G, 0) + (v1 * (Air * vLen * vLen));
                 v += force * Time.fixedDeltaTime;
                 pos += v * Time.fixedDeltaTime;
 
@@ -238,13 +304,15 @@ public class Ball : MonoBehaviour {
         Vector3 pos = transform.position;
         Vector3 v = GetComponent<Rigidbody>().velocity;
 
+        float _G = sliced ? G * 0.5f : G;
+
         int ground = 0;
         while (ground <= 1 || trajectory.Count<100)
         {
             Vector3 v1 = -v;
             v1.Normalize();
             float vLen = v.magnitude;
-            Vector3 force = new Vector3(0, -G, 0) + (v1 * (Air * vLen * vLen));
+            Vector3 force = new Vector3(0, -_G, 0) + (v1 * (Air * vLen * vLen));
 
             v += force * Time.fixedDeltaTime;
             pos += v * Time.fixedDeltaTime;

@@ -30,16 +30,16 @@ public class Tennisist : MonoBehaviour {
         Hit
     }
 
-    protected float vRun = 4f;
+    protected float vRun = 5f;
     protected float vStrafe = 1.5f;
-    protected float reactCooldown = 0.2f;
+    protected float reactCooldown = 0.02f;
 
     protected float driveSwingTime = 0.9f;
     protected float volleySwingTime = 0.25f;
     protected float sliceSwingTime = 0.5f;
     protected float reachSwingTime = 0.25f;
 
-    protected Vector3 driveHitDistanceFH = new Vector3 (-1.5f,0, -0.8f);
+    protected Vector3 driveHitDistanceFH = new Vector3 (-1.4f,0, -0.8f);
     protected Vector3 driveHitDistanceBH = new Vector3(1.25f, 0, -0.9f);
 
     protected Vector3 volleyHitDistanceFH = new Vector3(-1.2f, 0, -0.7f);
@@ -190,9 +190,22 @@ public class Tennisist : MonoBehaviour {
             else
                 animator.SetBool("ReadyToHit", false);        
         }
+        else 
+            animator.SetInteger("MoveType", 0);
+
+        if (state == PlayerState.Run || state == PlayerState.Strafe)
+        {
+            Vector3 dir = moveTo - transform.position;
+            dir.Normalize();
+            animator.SetFloat("MoveDirectionX", -dir.x);
+            animator.SetFloat("MoveDirectionY", dir.z);
+        }
         else
-            animator.SetInteger("MoveType", 3);
-    
+        {
+            animator.SetFloat("MoveDirectionX", 0);
+            animator.SetFloat("MoveDirectionY", 0);
+        }
+
 	}
 
     public void OnBallHit()
@@ -293,6 +306,11 @@ public class Tennisist : MonoBehaviour {
         state = shouldRun ? PlayerState.Run : PlayerState.Strafe;
         hit = HitType.None;
 
+
+#if UNITY_EDITOR
+   //     if (state == PlayerState.Strafe)
+      //        UnityEditor.EditorApplication.isPaused = true;
+#endif
         hitTimer = 100;
 
         if (canHitVolley && !shouldRun)
@@ -304,6 +322,7 @@ public class Tennisist : MonoBehaviour {
         }
         else if (canHitDrive)
         {
+            hitHeightK = (hitGS.y - groundstrokeHeightMin) / (groundstrokeHeightMax - groundstrokeHeightMin);
             hit = HitType.Drive;
             hitTimer = hitGSTime - driveSwingTime;            
         }
@@ -311,6 +330,8 @@ public class Tennisist : MonoBehaviour {
         {
             hit = HitType.Slice;
             hitTimer = hitGSTime - sliceSwingTime;
+
+
         }
         else if (canHitVolley)
         {
@@ -416,5 +437,9 @@ public class Tennisist : MonoBehaviour {
     void OnAnimatorMove()
     {
         Animator animator = GetComponent<Animator>();
+    }
+
+    public void Serve(bool first)
+    { 
     }
 }

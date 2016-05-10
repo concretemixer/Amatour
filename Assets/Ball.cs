@@ -39,8 +39,8 @@ public class Ball : MonoBehaviour {
     {
         Vector3 v2 = new Vector3();
         v2.y = -v.y * 0.75f;
-        v2.x = v.x * 0.8f;
-        v2.z = v.z * 0.8f;
+        v2.x = v.x * 0.75f;
+        v2.z = v.z * 0.75f;
         return v2;
     }
 
@@ -129,9 +129,9 @@ public class Ball : MonoBehaviour {
 
         Vector3 v;
         if (transform.position.z > 0)
-            v = new Vector3(Random.Range(-4, 4), 0, -Random.Range(6.4f, 10.0f)) - transform.position;
+            v = new Vector3(Random.Range(-4, 4), 0, -Random.Range(3.4f, 10.0f)) - transform.position;
         else
-            v = new Vector3(Random.Range(-4, 4), 0, Random.Range(6.4f, 10.0f)) - transform.position;
+            v = new Vector3(Random.Range(-4, 4), 0, Random.Range(3.4f, 10.0f)) - transform.position;
 
 
         v.y = 0.0f;
@@ -209,7 +209,8 @@ public class Ball : MonoBehaviour {
         foreach (var o in GameObject.FindGameObjectsWithTag("Player"))
         {
             if (Mathf.Sign(o.transform.position.z) != Mathf.Sign(transform.position.z))
-                o.GetComponent<Tennisist>().OnBallHit();
+                if (o.GetComponent<Tennisist>()!=null)
+                    o.GetComponent<Tennisist>().OnBallHit();
         }
     }
     void OnTriggerEnter(Collider col) {

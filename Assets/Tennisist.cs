@@ -38,12 +38,17 @@ public class Tennisist : MonoBehaviour {
     protected float volleySwingTime = 0.25f;
     protected float sliceSwingTime = 0.5f;
     protected float reachSwingTime = 0.25f;
+    protected float serveSwingTime = 1.0f;
 
     protected Vector3 driveHitDistanceFH = new Vector3 (-1.4f,0, -0.8f);
     protected Vector3 driveHitDistanceBH = new Vector3(1.25f, 0, -0.9f);
 
     protected Vector3 volleyHitDistanceFH = new Vector3(-1.2f, 0, -0.7f);
     protected Vector3 volleyHitDistanceBH = new Vector3(0.75f, 0, -0.6f);
+
+    protected Vector3 serveHitDistance = new Vector3(0.55f, 2.9f, 0.85f);
+    protected Vector3 serveTossDistance = new Vector3(0.55f, 1f, 0.85f);
+    protected Vector3 serveTossV = new Vector3(0, 7.6f, 0);
 
     protected float sliceHitDistance = 0.75f;
     protected float reachHitDistance = 1.5f;
@@ -64,6 +69,8 @@ public class Tennisist : MonoBehaviour {
     float hitHeightK;
     bool forehand;
     float hitTimer =  7000;
+    bool deuceCourt;
+
 
     Vector3 moveTo = Vector3.zero;
     Vector3 contactPoint = Vector3.zero;
@@ -151,10 +158,28 @@ public class Tennisist : MonoBehaviour {
                                 ball.GetComponent<Rigidbody>().velocity = v;
                                 //ball.GetComponent<Ball>().Hit();
                                 state = PlayerState.Recover;
-                             //   moveTo.z = -4;
+                                //moveTo.z = -4;
                                // Time.timeScale = 0.1f;
                             }
                             break;
+                        case HitType.Serve:
+                            if (hitTimer < -serveSwingTime)
+                            {
+#if UNITY_EDITOR
+
+                               // UnityEditor.EditorApplication.isPaused = true;
+#endif
+                               // ball.transform.position = transform.position + serveHitDistance;
+                                ball.GetComponent<Ball>().HitServe(deuceCourt);
+                                state = PlayerState.Recover;
+                                moveTo = transform.position;
+                                hitTimer = 1000;
+
+                                //   moveTo.z = -4;
+                                // Time.timeScale = 0.1f;
+                            }
+                            break;
+
                         default:
                             state = PlayerState.Watching;
                             break;
@@ -307,10 +332,7 @@ public class Tennisist : MonoBehaviour {
         hit = HitType.None;
 
 
-#if UNITY_EDITOR
-   //     if (state == PlayerState.Strafe)
-      //        UnityEditor.EditorApplication.isPaused = true;
-#endif
+
         hitTimer = 100;
 
         if (canHitVolley && !shouldRun)
@@ -439,7 +461,31 @@ public class Tennisist : MonoBehaviour {
         Animator animator = GetComponent<Animator>();
     }
 
-    public void Serve(bool first)
-    { 
+    public void Receive()
+    {
+        Animator animator = GetComponent<Animator>();
+        animator.Rebind();
+        state = PlayerState.Watching;
+    }
+
+
+    public void Serve(bool first, bool deuce)
+    {
+        Animator animator = GetComponent<Animator>();
+        animator.Rebind();
+        state = PlayerState.Swing;
+        hit = HitType.Serve;
+        hitTimer = 0;
+        animator.SetInteger("HitType", (int)hit);
+        animator.SetBool("ReadyToHit", true);
+
+        ball.transform.position = transform.position + serveTossDistance;
+        ball.GetComponent<Rigidbody>().velocity = serveTossV;
+
+        deuceCourt = deuce;
+#if UNITY_EDITOR
+
+        // UnityEditor.EditorApplication.isPaused = true;
+#endif
     }
 }

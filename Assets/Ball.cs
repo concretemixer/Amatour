@@ -60,6 +60,7 @@ public class Ball : MonoBehaviour {
             float _G = sliced ? G * 0.5f : G;
             GetComponent<Rigidbody>().AddForce(new Vector3(0, -_G, 0));
             GetComponent<Rigidbody>().AddForce(v * (Air * vLen * vLen));
+
         }
         else
         {
@@ -68,6 +69,7 @@ public class Ball : MonoBehaviour {
             {
               //  Debug.Log("z = " + transform.position.z);                
                 GetComponent<Rigidbody>().velocity = GetReboundV(v2);
+                gameObject.GetComponentInParent<Game>().onBallHitGround(transform.position);
             }
         }
 
@@ -160,11 +162,7 @@ public class Ball : MonoBehaviour {
             GetComponent<Rigidbody>().velocity = v * (speed * 0.1f + 10);
         }
 
-        foreach (var o in GameObject.FindGameObjectsWithTag("Player"))
-        {
-            if (Mathf.Sign(o.transform.position.z) != Mathf.Sign(transform.position.z))
-                o.GetComponent<Tennisist>().OnBallHit();
-        }
+        gameObject.GetComponentInParent<Game>().onBallHit(transform.position);
     }
 
 
@@ -206,12 +204,50 @@ public class Ball : MonoBehaviour {
             GetComponent<Rigidbody>().velocity = v * (speed * 0.1f + 15);
         }
 
-        foreach (var o in GameObject.FindGameObjectsWithTag("Player"))
+        gameObject.GetComponentInParent<Game>().onBallHit(transform.position);      
+    }
+
+
+    public void HitServe(bool deuce)
+    {
+        sliced = false;
+        float speed = GetComponent<Rigidbody>().velocity.magnitude;
+
+        Vector3 v;
+        if (transform.position.z > 0)
+            v = new Vector3((deuce ? 1 : -1)*Random.Range(1, 4), 0, -Random.Range(5.4f, 6.4f)) - transform.position;
+        else
+            v = new Vector3((deuce ? -1 : 1) * Random.Range(1, 4), 0, Random.Range(5.4f, 6.4f)) - transform.position;
+
+
+        v.y = 0.0f;
+
+        float angle;
+
+        float dNet = Mathf.Abs(transform.position.z / v.z) * v.magnitude;
+
+        if (CountAngle(speed * 0.1f + 30, transform.position.y, v.magnitude, dNet, out angle))
         {
-            if (Mathf.Sign(o.transform.position.z) != Mathf.Sign(transform.position.z))
-                if (o.GetComponent<Tennisist>()!=null)
-                    o.GetComponent<Tennisist>().OnBallHit();
+            v.Normalize();
+
+            v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
+            v.Normalize();
+
+            GetComponent<Rigidbody>().velocity = v * (speed * 0.1f + 30);
         }
+        else
+        {
+            CountAngle(speed * 0.1f + 10, transform.position.y, v.magnitude, dNet, out angle);
+            v.Normalize();
+
+            v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
+            v.Normalize();
+
+            GetComponent<Rigidbody>().velocity = v * (speed * 0.1f + 10);
+        }
+
+        gameObject.GetComponentInParent<Game>().onBallHit(transform.position);      
+
     }
     void OnTriggerEnter(Collider col) {
       

@@ -32,7 +32,7 @@ public class Tennisist : MonoBehaviour {
 
     protected float vRun = 5f;
     protected float vStrafe = 1.5f;
-    protected float reactCooldown = 0.02f;
+    protected float reactCooldown = 0.1f;
 
     protected float driveSwingTime = 0.9f;
     protected float volleySwingTime = 0.25f;
@@ -466,11 +466,16 @@ public class Tennisist : MonoBehaviour {
         Animator animator = GetComponent<Animator>();
         animator.Rebind();
         state = PlayerState.Watching;
+        GetComponent<Rigidbody>().velocity = Vector3.zero;
+        moveTo = transform.position;
     }
 
 
     public void Serve(bool first, bool deuce)
     {
+        GetComponent<Rigidbody>().velocity = Vector3.zero;
+        moveTo = transform.position;
+
         Animator animator = GetComponent<Animator>();
         animator.Rebind();
         state = PlayerState.Swing;

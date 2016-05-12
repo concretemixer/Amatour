@@ -131,9 +131,9 @@ public class Ball : MonoBehaviour {
 
         Vector3 v;
         if (transform.position.z > 0)
-            v = new Vector3(Random.Range(-4, 4), 0, -Random.Range(3.4f, 10.0f)) - transform.position;
+            v = new Vector3(Random.Range(-4.5f, 4.5f), 0, -Random.Range(3.4f, 10.0f)) - transform.position;
         else
-            v = new Vector3(Random.Range(-4, 4), 0, Random.Range(3.4f, 10.0f)) - transform.position;
+            v = new Vector3(Random.Range(-4.5f, 4.5f), 0, Random.Range(3.4f, 10.0f)) - transform.position;
 
 
         v.y = 0.0f;
@@ -155,6 +155,8 @@ public class Ball : MonoBehaviour {
         {
             CountAngle(speed * 0.1f + 10, transform.position.y, v.magnitude, dNet, out angle);
             v.Normalize();
+
+            angle += Random.Range(-3, 3);
 
             v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
             v.Normalize();

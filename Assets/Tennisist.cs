@@ -72,6 +72,7 @@ public class Tennisist : MonoBehaviour {
     protected bool deuceCourt;
 
 
+    protected Vector3 aimTo = Vector3.zero;
     protected Vector3 moveTo = Vector3.zero;
     protected Vector3 contactPoint = Vector3.zero;
 
@@ -134,7 +135,8 @@ public class Tennisist : MonoBehaviour {
                         case HitType.Drive:
                             if (hitTimer < -driveSwingTime)
                             {
-                                ball.GetComponent<Ball>().Hit();
+                                ball.GetComponent<Ball>().Hit(aimTo);
+                                aimTo = Vector3.zero;
                                 state = PlayerState.Recover;
                                // moveTo.z = -13;
                              //   Time.timeScale = 0;
@@ -143,7 +145,8 @@ public class Tennisist : MonoBehaviour {
                         case HitType.Slice:
                             if (hitTimer < -sliceSwingTime)
                             {
-                                ball.GetComponent<Ball>().HitSlice();
+                                ball.GetComponent<Ball>().HitSlice(aimTo);
+                                aimTo = Vector3.zero;
                                 state = PlayerState.Recover;
                                 // moveTo.z = -13;
                                 //   Time.timeScale = 0;
@@ -186,6 +189,7 @@ public class Tennisist : MonoBehaviour {
                             state = PlayerState.Watching;
                             break;
                     }
+                    
                 }
                 break;
         }

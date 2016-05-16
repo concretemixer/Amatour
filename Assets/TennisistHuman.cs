@@ -11,10 +11,14 @@ public class TennisistHuman : Tennisist {
         if (state == PlayerState.Recover)
         {
             GameObject.Find("MoveTo").transform.position = moveTo;
+            GameObject.Find("AimTo").transform.position = new Vector3(0, -1, 0);
         }
         else
         {
             GameObject.Find("MoveTo").transform.position = new Vector3(0, -1, 0);
+
+         //   if (aimTo!=Vector3.zero)
+                GameObject.Find("AimTo").transform.position = aimTo;
         }
 
 
@@ -35,6 +39,24 @@ public class TennisistHuman : Tennisist {
                 }
             }            
         }
+
+        if (state == PlayerState.Run || state == PlayerState.Strafe || state == PlayerState.Swing)
+        {
+            if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
+            {
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hit;
+
+                if (Physics.Raycast(ray, out hit, 100, 1 << LayerMask.NameToLayer("Ground")))
+                {
+                    if (hit.point.z > 0)
+                    {
+                        aimTo = hit.point;
+                    }
+                }
+            }
+        }
+
         base.Update();
 	}
 

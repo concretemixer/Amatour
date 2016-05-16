@@ -113,7 +113,7 @@ public class Ball : MonoBehaviour {
             {
                 GetComponent<Rigidbody>().velocity = Vector3.zero;
                 transform.position = new Vector3(Random.Range(-4, 4), 1, -13);
-                Hit();               
+                Hit(Vector3.zero);               
                 keyC = true;
 
             }
@@ -124,16 +124,25 @@ public class Ball : MonoBehaviour {
 
 	}
 
-    public void Hit()
+    public void Hit(Vector3 target)
     {
         sliced = false;
         float speed = GetComponent<Rigidbody>().velocity.magnitude;
 
         Vector3 v;
-        if (transform.position.z > 0)
-            v = new Vector3(Random.Range(-4.5f, 4.5f), 0, -Random.Range(5.4f, 11.0f)) - transform.position;
+
+        if (target == Vector3.zero)
+        {
+            if (transform.position.z > 0)
+                v = new Vector3(Random.Range(-4.5f, 4.5f), 0, -Random.Range(5.4f, 11.0f)) - transform.position;
+            else
+                v = new Vector3(Random.Range(-4.5f, 4.5f), 0, Random.Range(5.4f, 11.0f)) - transform.position;
+        }
         else
-            v = new Vector3(Random.Range(-4.5f, 4.5f), 0, Random.Range(5.4f, 11.0f)) - transform.position;
+        {
+            Debug.Log("AIM");
+            v = target - transform.position;
+        }
 
 
         v.y = 0.0f;
@@ -146,39 +155,57 @@ public class Ball : MonoBehaviour {
         {
             v.Normalize();
 
-            angle += Random.Range(-5, 5);
+            angle += Random.Range(-5.0f, 5.0f);
             v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
+            angle -= 5.0f;// Random.Range(-5.0f, 5.0f);
+            v = Quaternion.AngleAxis(angle, Vector3.up) * v;
+
             v.Normalize();
             
             GetComponent<Rigidbody>().velocity = v * (speed * 0.1f + 20);
         }
+            /*
         else
         {
             CountAngle(speed * 0.1f + 10, transform.position.y, v.magnitude, dNet, out angle);
             v.Normalize();
 
-            angle += Random.Range(-3, 3);
+            angle += Random.Range(-3.0f, 3.0f);
 
             v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
+
+            angle = Random.Range(-3.0f, 3.0f);
+            v = Quaternion.AngleAxis(angle, Vector3.up) * v;
+
             v.Normalize();
+
 
             GetComponent<Rigidbody>().velocity = v * (speed * 0.1f + 15);
         }
+             * */
 
         gameObject.GetComponentInParent<Game>().onBallHit(transform.position);
     }
 
 
-    public void HitSlice()
+    public void HitSlice(Vector3 target)
     {
         sliced = true;
         float speed = GetComponent<Rigidbody>().velocity.magnitude;
 
         Vector3 v;
-        if (transform.position.z > 0)
-            v = new Vector3(Random.Range(-4, 4), 0, -Random.Range(6.4f, 11.0f)) - transform.position;
+        if (target == Vector3.zero)
+        {
+            if (transform.position.z > 0)
+                v = new Vector3(Random.Range(-4, 4), 0, -Random.Range(6.4f, 11.0f)) - transform.position;
+            else
+                v = new Vector3(Random.Range(-4, 4), 0, Random.Range(6.4f, 11.0f)) - transform.position;
+        }
         else
-            v = new Vector3(Random.Range(-4, 4), 0, Random.Range(6.4f, 11.0f)) - transform.position;
+        {
+            Debug.Log("AIM");
+            v = target - transform.position;
+        }
 
 
         v.y = 0.0f;
@@ -192,6 +219,10 @@ public class Ball : MonoBehaviour {
             v.Normalize();
 
             v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
+
+            angle = Random.Range(-3.0f, 3.0f);
+            v = Quaternion.AngleAxis(angle, Vector3.up) * v;
+
             v.Normalize();
 
             GetComponent<Rigidbody>().velocity = v * (speed * 0.1f + 15);
@@ -202,6 +233,9 @@ public class Ball : MonoBehaviour {
             v.Normalize();
 
             v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
+            angle = Random.Range(-3.0f, 3.0f);
+            v = Quaternion.AngleAxis(angle, Vector3.up) * v;
+
             v.Normalize();
 
             GetComponent<Rigidbody>().velocity = v * (speed * 0.1f + 15);

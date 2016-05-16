@@ -118,7 +118,7 @@ public class Player : MonoBehaviour {
                     if (ball.transform.position.z > contactPoint.z)
                     {
                         Debug.Log("Hit: " + swingTimer);
-                        ball.GetComponent<Ball>().Hit();
+                        ball.GetComponent<Ball>().Hit(Vector3.zero);
                         state = PlayerState.Hit;
                         hitCooldown = 0.2f;
                     }

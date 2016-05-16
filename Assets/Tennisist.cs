@@ -5,7 +5,7 @@ using System.Collections;
 
 public class Tennisist : MonoBehaviour {
 
-    enum HitType
+    protected enum HitType
     {
         None = 0,
         Drive = 1,
@@ -17,7 +17,7 @@ public class Tennisist : MonoBehaviour {
         Serve = 7
     }
 
-    enum PlayerState
+    protected enum PlayerState
     {
         Recover,
         Watching,
@@ -32,7 +32,7 @@ public class Tennisist : MonoBehaviour {
 
     protected float vRun = 5f;
     protected float vStrafe = 1.5f;
-    protected float reactCooldown = 0.1f;
+    protected float reactCooldown = 0.3f;
 
     protected float driveSwingTime = 0.9f;
     protected float volleySwingTime = 0.25f;
@@ -61,19 +61,19 @@ public class Tennisist : MonoBehaviour {
 
     protected float reachHeightMin = 0.1f;
 
-    GameObject ball;
+    protected GameObject ball;
 
 
-    PlayerState state = PlayerState.Watching;
-    HitType hit;
-    float hitHeightK;
-    bool forehand;
-    float hitTimer =  7000;
-    bool deuceCourt;
+    protected PlayerState state = PlayerState.Watching;
+    protected HitType hit;
+    protected float hitHeightK;
+    protected bool forehand;
+    protected float hitTimer =  7000;
+    protected bool deuceCourt;
 
 
-    Vector3 moveTo = Vector3.zero;
-    Vector3 contactPoint = Vector3.zero;
+    protected Vector3 moveTo = Vector3.zero;
+    protected Vector3 contactPoint = Vector3.zero;
 
 
 
@@ -83,7 +83,7 @@ public class Tennisist : MonoBehaviour {
 	}
 
 	// Update is called once per frame
-	void Update () {
+	protected void Update () {
 
        // if (state!=PlayerState.Watching)
         //    Debug.Log("S = " + state.ToString());
@@ -117,7 +117,7 @@ public class Tennisist : MonoBehaviour {
                 {
                     Vector3 v = moveTo - transform.position;
                     v.Normalize();
-                    GetComponent<Rigidbody>().velocity = v * vStrafe;
+                    GetComponent<Rigidbody>().velocity = v * vRun;
                     //animator.SetInteger("MoveType", 1);
                     if ((transform.position - moveTo).magnitude < 0.1)
                     {
@@ -153,10 +153,12 @@ public class Tennisist : MonoBehaviour {
                             if (hitTimer < -volleySwingTime)
                             {
                                 Vector3 v = ball.GetComponent<Rigidbody>().velocity;
-                                v.z = -v.z;
+                                v.z = -v.z*1.1f;
+                                v.x = 0.5f*v.x;
                                 v.y = Mathf.Abs(v.y);
                                 ball.GetComponent<Rigidbody>().velocity = v;
                                 //ball.GetComponent<Ball>().Hit();
+                                gameObject.GetComponentInParent<Game>().onBallHit(ball.transform.position);
                                 state = PlayerState.Recover;
                                 //moveTo.z = -4;
                                // Time.timeScale = 0.1f;

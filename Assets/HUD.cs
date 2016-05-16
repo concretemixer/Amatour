@@ -40,5 +40,8 @@ public class HUD : MonoBehaviour {
         o = GameObject.Find("ScoreText");
         o.GetComponent<Text>().text = (game.scoreSet[0]+ "-"+ game.scoreSet[1]) + " | " + score + " | " +
             game.state.ToString();
+
+        o = GameObject.Find("FpsText");
+        o.GetComponent<Text>().text = (1.0f / Time.smoothDeltaTime).ToString("F2");
 	}
 }

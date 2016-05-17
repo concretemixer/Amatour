@@ -155,26 +155,26 @@ public class Ball : MonoBehaviour {
         {
             v.Normalize();
 
-            angle += Random.Range(-5.0f, 5.0f);
+            angle += Random.Range(-10.0f, 10.0f);
             v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
-            angle -= 5.0f;// Random.Range(-5.0f, 5.0f);
+            angle = Random.Range(-10.0f, 10.0f);
             v = Quaternion.AngleAxis(angle, Vector3.up) * v;
 
             v.Normalize();
             
             GetComponent<Rigidbody>().velocity = v * (speed * 0.1f + 20);
         }
-            /*
+            
         else
         {
             CountAngle(speed * 0.1f + 10, transform.position.y, v.magnitude, dNet, out angle);
             v.Normalize();
 
-            angle += Random.Range(-3.0f, 3.0f);
+            angle += Random.Range(-10.0f, 10.0f);
 
             v.y = Mathf.Tan(Mathf.PI * angle / 180.0f);
 
-            angle = Random.Range(-3.0f, 3.0f);
+            angle = Random.Range(-10.0f, 10.0f);
             v = Quaternion.AngleAxis(angle, Vector3.up) * v;
 
             v.Normalize();
@@ -182,7 +182,7 @@ public class Ball : MonoBehaviour {
 
             GetComponent<Rigidbody>().velocity = v * (speed * 0.1f + 15);
         }
-             * */
+            
 
         gameObject.GetComponentInParent<Game>().onBallHit(transform.position);
     }

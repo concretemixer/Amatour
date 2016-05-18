@@ -318,8 +318,8 @@ public class Tennisist : MonoBehaviour {
 
         }
 
-        Debug.Log("hitGSTime =" + hitGSTime + " / " + (driveSwingTime + (dGS / vRun)));
-        Debug.Log("hitVTime =" + hitVTime + " / " + (volleySwingTime + (dV / vRun)));
+    //    Debug.Log("hitGSTime =" + hitGSTime + " / " + (driveSwingTime + (dGS / vRun)));
+      //  Debug.Log("hitVTime =" + hitVTime + " / " + (volleySwingTime + (dV / vRun)));
 
      //   Debug.Log("dGS =" + dGS);
       //  Debug.Log("dV =" + dV);

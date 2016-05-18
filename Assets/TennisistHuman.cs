@@ -5,6 +5,8 @@ using System.Collections;
 
 public class TennisistHuman : Tennisist {
 
+    private bool aiming = false;
+    private float aimTime = 0;
 	// Update is called once per frame
 	void Update () {
 
@@ -17,13 +19,26 @@ public class TennisistHuman : Tennisist {
         {
             GameObject.Find("MoveTo").transform.position = new Vector3(0, -1, 0);
 
-         //   if (aimTo!=Vector3.zero)
+            if (aimTo != Vector3.zero)
+            {
                 GameObject.Find("AimTo").transform.position = aimTo;
+
+                float aimK = 1;
+
+                if (aimTime < 0.5)
+                    aimK = Mathf.Lerp(1, 0.1f, aimTime);
+                else if (aimTime < 0.75)
+                    aimK = Mathf.Lerp(0.1f, 3.0f, (aimTime - 0.5f) / 0.25f);
+                else
+                    aimK = 3;
+
+                GameObject.Find("AimTo").transform.localScale = new Vector3(aimK, 1, aimK);
+            }
         }
 
 
         if (state == PlayerState.Recover || state == PlayerState.Watching)  {
-            if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
+            if (Input.GetMouseButtonDown(0))
             {            
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                 RaycastHit hit;
@@ -42,8 +57,13 @@ public class TennisistHuman : Tennisist {
 
         if (state == PlayerState.Run || state == PlayerState.Strafe || state == PlayerState.Swing)
         {
-            if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1))
+            if (Input.GetMouseButton(0))
             {
+                Debug.Log("HERE!!!!!");
+                if (!aiming)                
+                    aimTime = 0;                
+                else
+                    aimTime += Time.deltaTime;
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                 RaycastHit hit;
 
@@ -54,8 +74,12 @@ public class TennisistHuman : Tennisist {
                         aimTo = hit.point;
                     }
                 }
+                aiming = true;
             }
         }
+
+        if (!Input.GetMouseButton(0))
+            aiming = false;
 
         base.Update();
 	}
